@@ -43,8 +43,8 @@ const layer5km = L.layerGroup();
 const layerSchuelerlauf = L.layerGroup();
 const layerKinderlauf = L.layerGroup();
 const layerBambinilauf = L.layerGroup();
-const layerHelfer = L.layerGroup(); // NEU: Helfer-Layer
-
+const layerHelfer = L.layerGroup(); 
+  
 // Marker-Referenzen
 let startMarker10km, goalMarker10km;
 let startMarker5km, goalMarker5km;
@@ -141,8 +141,6 @@ fetch('bambinilauf.geojson')
     addStartAndGoalMarkers(data, 'black', '0,6', layerBambinilauf, { start: startMarkerBambinilauf, goal: goalMarkerBambinilauf });
   });
 
-// Helfer-Layer erstellen
-const layerHelfer = L.layerGroup();
 
 // Helfer laden
 fetch('helfer.geojson')
@@ -209,4 +207,5 @@ map.on('baselayerchange', function(e) {
 </script>
 </body>
 </html>
+
 
