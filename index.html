@@ -150,7 +150,7 @@ const baseLayers = {
 layer10km.addTo(map);
 
 // Layer-Kontrolle
-L.control.layers(baseLayers ,{ collapsed: false }).addTo(map);
+L.control.layers(baseLayers).addTo(map);
 
 // Beim Layerwechsel immer auf 10km-Bounds zoomen
 map.on('baselayerchange', function(e) {
@@ -162,5 +162,6 @@ map.on('baselayerchange', function(e) {
 </script>
 </body>
 </html>
+
 
 
