@@ -141,21 +141,21 @@ fetch('bambinilauf.geojson')
     addStartAndGoalMarkers(data, 'black', '0,6', layerBambinilauf, { start: startMarkerBambinilauf, goal: goalMarkerBambinilauf });
   });
 
-// Helfer laden
+// ===================== Helfer laden =====================
+const helferMarkers = [];
+
 fetch('helfer.geojson')
   .then(res => res.json())
   .then(data => {
     L.geoJSON(data, {
       pointToLayer: (feature, latlng) => {
         const id = feature.properties.id || '';
-        const color = feature.properties.color || 'red'; // Farbe aus GeoJSON
-        const anchorX = feature.properties.anchorX ?? 15; // Anchor X
-        const anchorY = feature.properties.anchorY ?? 15; // Anchor Y
+        const color = feature.properties.color || 'red';
 
-        const icon = L.divIcon({
+        const iconFn = () => L.divIcon({
           className: "helfer-icon",
-          iconAnchor: [anchorX, anchorY],
-          html: `<div class="marker-label" style="color:${color};border-color:${color};">${id}</div>`
+          iconAnchor: [15, 15],
+          html: createScaledMarkerLabel(id, 30, color)
         });
 
         const tooltipText =
@@ -164,17 +164,28 @@ fetch('helfer.geojson')
           `Aufgabe: ${feature.properties.Aufgabe || ''}<br>` +
           `Erfahrung: ${feature.properties.Erfahrung || ''}`;
 
-        const marker = L.marker(latlng, { icon }).bindTooltip(tooltipText, {
-          permanent: false,
-          direction: 'top',
-          opacity: 0.9,
-          sticky: true,
-          interactive: true
-        });
+        const marker = L.marker(latlng, { icon: iconFn() })
+          .bindTooltip(tooltipText, {
+            permanent: false,
+            direction: 'top',
+            opacity: 0.9,
+            sticky: true,
+            interactive: true
+          });
+
+        // Speichern, um beim Zoom das Icon zu aktualisieren
+        helferMarkers.push({ marker, iconFn });
 
         return marker;
       }
     }).addTo(layerHelfer);
+
+    // Zoom-Listener für Helfer
+    map.on('zoomend', () => {
+      helferMarkers.forEach(({ marker, iconFn }) => {
+        marker.setIcon(iconFn());
+      });
+    });
   })
   .catch(err => console.error("Fehler beim Laden der Helfer:", err));
 
@@ -206,4 +217,3 @@ map.on('baselayerchange', function(e) {
 </script>
 </body>
 </html>
-
