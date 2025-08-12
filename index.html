@@ -160,7 +160,7 @@ fetch('helfer.geojson')
         });
 
         const tooltipText =
-          `Anzahl: ${feature.properties.Anzahl || ''}<br>` +
+          `Anzahl: ${feature.properties.color || ''}<br>` +
           `Ausrüstung: ${feature.properties.Ausrüstung || ''}<br>` +
           `Aufgabe: ${feature.properties.Aufgabe || ''}<br>` +
           `Erfahrung: ${feature.properties.Erfahrung || ''}`;
@@ -207,5 +207,6 @@ map.on('baselayerchange', function(e) {
 </script>
 </body>
 </html>
+
 
 
