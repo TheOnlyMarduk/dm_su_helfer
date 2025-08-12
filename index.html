@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8" />
-<title>Laufstrecken</title>
+<title>Helferkarte</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
@@ -141,38 +141,42 @@ fetch('bambinilauf.geojson')
     addStartAndGoalMarkers(data, 'black', '0,6', layerBambinilauf, { start: startMarkerBambinilauf, goal: goalMarkerBambinilauf });
   });
 
-// ===================== Helfer laden =====================
+// Helfer laden
 fetch('helfer.geojson')
   .then(res => res.json())
   .then(data => {
     L.geoJSON(data, {
       pointToLayer: (feature, latlng) => {
-        const color = feature.properties.farbe || 'red'; // Standardfarbe Rot
-        const iconAnchor = feature.properties.iconAnchor || [15, -5]; // Standardposition
-        const labelText = feature.properties.id || '';
+        const id = feature.properties.id || '';
+        const color = feature.properties.color || 'red'; // Farbe aus GeoJSON
+        const anchorX = feature.properties.anchorX ?? 15; // Anchor X
+        const anchorY = feature.properties.anchorY ?? 15; // Anchor Y
 
-        // Label-Icon mit individueller Farbe und Position
-        const labelIcon = L.divIcon({
-          className: 'marker-label',
-          html: `<div style="color:${color};border-color:${color};">${labelText}</div>`,
-          iconAnchor: iconAnchor
+        const icon = L.divIcon({
+          className: "helfer-icon",
+          iconAnchor: [anchorX, anchorY],
+          html: `<div class="marker-label" style="color:${color};border-color:${color};">${id}</div>`
         });
 
-        const marker = L.marker(latlng, { icon: labelIcon });
-
-        // Tooltip mit den vier Feldern
-        const tooltipContent =
+        const tooltipText =
           `Anzahl: ${feature.properties.Anzahl || ''}<br>` +
           `Ausrüstung: ${feature.properties.Ausrüstung || ''}<br>` +
           `Aufgabe: ${feature.properties.Aufgabe || ''}<br>` +
           `Erfahrung: ${feature.properties.Erfahrung || ''}`;
 
-        marker.bindTooltip(tooltipContent, { direction: 'top', sticky: true });
+        const marker = L.marker(latlng, { icon }).bindTooltip(tooltipText, {
+          permanent: false,
+          direction: 'top',
+          opacity: 0.9,
+          sticky: true,
+          interactive: true
+        });
 
         return marker;
       }
     }).addTo(layerHelfer);
-  });
+  })
+  .catch(err => console.error("Fehler beim Laden der Helfer:", err));
 
 // ===================== Layer-Kontrolle =====================
 const baseLayers = {
@@ -202,3 +206,4 @@ map.on('baselayerchange', function(e) {
 </script>
 </body>
 </html>
+
