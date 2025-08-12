@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="utf-8" />
-<title>Laufstrecken</title>
+<title>Leaflet Helferkarte</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
@@ -11,159 +11,77 @@
 <style>
   html, body { margin: 0; padding: 0; height: 100%; }
   #map { height: 100vh; width: 100vw; }
-  .arrow-icon { font-size: 20px; display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; pointer-events: none; }
-  .arrow-symbol { display: inline-block; transform-origin: center; }
-  .marker-label { background: white; border: 2px solid black; border-radius: 50%; text-align: center; font-weight: bold; color: black; box-shadow: 0 0 3px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
-  .km-label { background: yellow; border: 1px solid black; border-radius: 3px; padding: 2px 5px; font-weight: bold; font-size: 12px; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+  .marker-label {
+    background: white;
+    border: 1px solid black;
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+  }
 </style>
 </head>
 <body>
 <div id="map"></div>
 
 <script>
-const map = L.map('map');
+// ===================== Karte initialisieren =====================
+const map = L.map('map').setView([50.94, 6.95], 13);
 
-// OpenStreetMap-Kachel-Layer
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+// Basiskarte
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap'
+}).addTo(map);
 
-// Layer-Gruppen
-const layer10km = L.layerGroup();
-const layer5km = L.layerGroup();
-const layerSchuelerlauf = L.layerGroup();
-const layerKinderlauf = L.layerGroup();
-const layerBambinilauf = L.layerGroup();
+// ===================== Helfer-Layer erstellen =====================
+const helferLayer = L.layerGroup();
 
-
-// Marker-Referenzen
-let startMarker10km, goalMarker10km;
-let startMarker5km, goalMarker5km;
-let startMarkerSchueler, goalMarkerSchueler;
-let startMarkerKinderlauf, goalMarkerKinderlauf;
-let startMarkerBambinilauf, goalMarkerBambinilauf;
-
-// Variable für die Bounds des 10km-Layers
-let bounds10km = null;
-
-// Skalierte Marker-Beschriftungen
-function createScaledMarkerLabel(text, baseSize, color = 'black') {
-  const zoom = map.getZoom();
-  const scale = Math.min(1, Math.max(0.6, (zoom - 12) / 6));
-  const size = baseSize * scale;
-  return `<div class="marker-label" style="width:${size}px;height:${size}px;font-size:${size*0.45}px;color:${color};border-color:${color};">${text}</div>`;
-}
-
-// Start- und Zielmarker
-function addStartAndGoalMarkers(geojson, color, labelText, targetLayer, markerRefs) {
-  if (!geojson.features || geojson.features.length === 0) return;
-  const coords = geojson.features[0].geometry.coordinates;
-  const startLatLng = L.latLng(coords[0][1], coords[0][0]);
-  const goalLatLng = L.latLng(coords[coords.length - 1][1], coords[coords.length - 1][0]);
-
-  const startIcon = () => L.divIcon({ className: "start-goal-icon", iconAnchor: [15,15], html: createScaledMarkerLabel(labelText, 30, color) });
-  const goalIcon = () => L.divIcon({ className: "start-goal-icon", iconAnchor: [15,15], html: createScaledMarkerLabel("Ziel", 30, color) });
-
-  markerRefs.start = L.marker(startLatLng, { icon: startIcon() }).addTo(targetLayer);
-  markerRefs.goal = L.marker(goalLatLng, { icon: goalIcon() }).addTo(targetLayer);
-
-  map.on('zoomend', () => {
-    if (markerRefs.start) markerRefs.start.setIcon(startIcon());
-    if (markerRefs.goal) markerRefs.goal.setIcon(goalIcon());
-  });
-}
-
-// Pfeile laden
-function loadAndDrawArrows(geojsonUrl, color, targetLayer) {
-  fetch(geojsonUrl)
-    .then(res => res.json())
-    .then(data => {
-      data.features.forEach(feature => {
-        if (!feature.geometry || feature.geometry.type !== 'Point') return;
-        const coords = feature.geometry.coordinates;
-        const angle = (feature.properties.angle + 270) % 360;
-        const latlng = L.latLng(coords[1], coords[0]);
-        const arrowHtml = `<span class="arrow-symbol" style="transform: rotate(${angle}deg); color: ${color};">➤</span>`;
-        const arrowIcon = L.divIcon({ className: 'arrow-icon', html: arrowHtml, iconSize: [20,20], iconAnchor: [10,10] });
-        L.marker(latlng, { icon: arrowIcon }).addTo(targetLayer);
-      });
-    })
-    .catch(err => console.error(`Fehler beim Laden der ${geojsonUrl}:`, err));
-}
-
-  
-// Laufstrecken laden
-fetch('10km.geojson')
+// GeoJSON laden
+fetch('helfer.geojson')
   .then(res => res.json())
   .then(data => {
-    const geojsonLayer = L.geoJSON(data, { style: { color: 'blue', weight: 4 } }).addTo(layer10km);
-    bounds10km = geojsonLayer.getBounds();
-    map.fitBounds(bounds10km, { padding: [20,20] });
-    addStartAndGoalMarkers(data, 'blue', '10k', layer10km, { start: startMarker10km, goal: goalMarker10km });
-    loadAndDrawArrows('richtung.geojson', 'blue', layer10km);
-    
-  });
+    L.geoJSON(data, {
+      pointToLayer: (feature, latlng) => {
+        // Beschriftung mit ID
+        const labelIcon = L.divIcon({
+          className: 'marker-label',
+          html: feature.properties.id || '',
+          iconAnchor: [15, -5] // <<--- Hier Position der Beschriftung ändern
+        });
 
-fetch('5km.geojson')
-  .then(res => res.json())
-  .then(data => {
-    L.geoJSON(data, { style: { color: 'red', weight: 4 } }).addTo(layer5km);
-    addStartAndGoalMarkers(data, 'red', '5k', layer5km, { start: startMarker5km, goal: goalMarker5km });
-    loadAndDrawArrows('5km_richtung.geojson', 'red', layer5km);
+        const marker = L.marker(latlng, { icon: labelIcon });
 
-  });
+        // Tooltip zusammensetzen
+        const tooltipContent =
+          `Anzahl: ${feature.properties.Anzahl || ''}<br>` +
+          `Ausrüstung: ${feature.properties.Ausrüstung || ''}<br>` +
+          `Aufgabe: ${feature.properties.Aufgabe || ''}<br>` +
+          `Erfahrung: ${feature.properties.Erfahrung || ''}`;
 
-fetch('schuelerlauf.geojson')
-  .then(res => res.json())
-  .then(data => {
-    L.geoJSON(data, { style: { color: 'green', weight: 4 } }).addTo(layerSchuelerlauf);
-    addStartAndGoalMarkers(data, 'green', '3,6', layerSchuelerlauf, { start: startMarkerSchueler, goal: goalMarkerSchueler });
-    loadAndDrawArrows('schueler_richtung.geojson', 'green', layerSchuelerlauf);
-    
-  });
+        marker.bindTooltip(tooltipContent, {
+          permanent: false,
+          direction: 'top',
+          sticky: true
+        });
 
-fetch('kinderlauf.geojson')
-  .then(res => res.json())
-  .then(data => {
-    L.geoJSON(data, { style: { color: 'brown', weight: 4 } }).addTo(layerKinderlauf);
-    addStartAndGoalMarkers(data, 'brown', '1,2', layerKinderlauf, { start: startMarkerKinderlauf, goal: goalMarkerKinderlauf });
-   
-  });
+        return marker;
+      }
+    }).addTo(helferLayer);
+  })
+  .catch(err => console.error('Fehler beim Laden von helfer.geojson:', err));
 
-fetch('bambinilauf.geojson')
-  .then(res => res.json())
-  .then(data => {
-    L.geoJSON(data, { style: { color: 'black', weight: 4 } }).addTo(layerBambinilauf);
-    addStartAndGoalMarkers(data, 'black', '0,6', layerBambinilauf, { start: startMarkerBambinilauf, goal: goalMarkerBambinilauf });
- 
-  });
-
-
-// Basis-Layer
-const baseLayers = {
-  "10 km DM und Citylauf (2 Runden)": layer10km,
-  "5 km Citylauf": layer5km,
-  "3,6 km KSK Köln - Schülerlauf (U14/U16)": layerSchuelerlauf,
-  "1,2 km KSK Köln - Kinderlauf (U10/U12) (2 Runden)": layerKinderlauf,
-  "0,6 km KSK Köln - Bambinilauf (U8)": layerBambinilauf
+// ===================== Layer Control =====================
+const overlays = {
+  "Helfer": helferLayer
 };
 
+// Helfer-Layer direkt beim Start aktivieren
+helferLayer.addTo(map);
 
-layer10km.addTo(map);
-
-// Layer-Kontrolle
-L.control.layers(baseLayers, null, { collapsed: false }).addTo(map);
-
-// Beim Layerwechsel immer auf 10km-Bounds zoomen
-map.on('baselayerchange', function(e) {
-  if (bounds10km) {
-    map.fitBounds(bounds10km, { padding: [20, 20] });
-  }
-});
+// Layer-Kontrolle mit ausgeklappter Legende
+L.control.layers({}, overlays, { collapsed: false }).addTo(map);
 
 </script>
 </body>
 </html>
-
-
-
-
-
