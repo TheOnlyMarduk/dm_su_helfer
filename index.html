@@ -162,7 +162,6 @@ fetch('helfer.geojson')
           `Anzahl: ${feature.properties.Anzahl || ''}<br>` +
           `Ausrüstung: ${feature.properties.Ausrüstung || ''}<br>` +
           `Aufgabe: ${feature.properties.Aufgabe || ''}<br>` +
-           `farbe: ${feature.properties.color || ''}<br>` +
           `Erfahrung: ${feature.properties.Erfahrung || ''}`;
 
         const marker = L.marker(latlng, { icon: iconFn() })
@@ -218,4 +217,5 @@ map.on('baselayerchange', function(e) {
 </script>
 </body>
 </html>
+
 
