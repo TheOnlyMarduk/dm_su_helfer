@@ -30,6 +30,6 @@
 { "type": "Feature", "properties": { "id": 25,  "color": "green", "anchorX": 15,"anchorY": 20,"Anzahl": 1, "Ausrüstung": "Warnweste, 15 Gitter, 1x Z. 250 StVO", "Aufgabe": "Krankenwagen durchlassen", "Erfahrung": null }, "geometry": { "type": "Point", "coordinates": [ 7.206945390517546, 50.800186923387969 ] } },
 { "type": "Feature", "properties": { "id": 26,  "color": "black", "anchorX": 15,"anchorY": 20,"Anzahl": 1, "Ausrüstung": "Warnweste, 10 Gitter, 1x Z. 250 StVO", "Aufgabe": "Zufahrt sperren", "Erfahrung": null }, "geometry": { "type": "Point", "coordinates": [ 7.207599766336163, 50.799325417290504 ] } },
 { "type": "Feature", "properties": { "id": 27, "color": "black", "anchorX": 15,"anchorY": 20, "Anzahl": 2, "Ausrüstung": "Warnweste, 10 Gitter, 1x Z. 250 StVO", "Aufgabe": "Zufahrt sperren", "Erfahrung": null }, "geometry": { "type": "Point", "coordinates": [ 7.20801434412079, 50.798651623342586 ] } },
-{ "type": "Feature", "properties": { "id": 28,  "color": "black", "anchorX": 15,"anchorY": 20,"Anzahl": 2, "Ausrüstung": "Warnweste, 15 Gitter2, "Aufgabe": "Zufahrt sperren", "Erfahrung": null }, "geometry": { "type": "Point", "coordinates": [ 7.208446332932056, 50.797643672117943 ] } }
+{ "type": "Feature", "properties": { "id": 28,  "color": "black", "anchorX": 15,"anchorY": 20,"Anzahl": 2, "Ausrüstung": "Warnweste, 15 Gitter2", "Aufgabe": "Zufahrt sperren", "Erfahrung": null }, "geometry": { "type": "Point", "coordinates": [ 7.208446332932056, 50.797643672117943 ] } }
 ]
 }
