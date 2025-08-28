@@ -241,7 +241,10 @@ fetch('helfer.geojson')
 
 // Overlays laden  
 const umleitungVerbotGroup = L.layerGroup([umleitungLayer, verbotLayer]);
+
+// gleich aktivieren
 umleitungVerbotGroup.addTo(map);
+
 // ===================== Layer-Kontrolle =====================
 const baseLayers = {
   "10 km DM und Citylauf (2 Runden)": layer10km,
@@ -256,10 +259,9 @@ const overlays = {
   "Umleitung und Straßensperrungen": umleitungVerbotGroup
 };
 
-// Standardmäßig 10 km + Helfer anzeigen
+// Standardmäßig 10 km + Helfer + Umleitung/Verbot anzeigen
 layer10km.addTo(map);
 layerHelfer.addTo(map);
-L.layerGroup([umleitungLayer, verbotLayer]).addTo(map);
 
 L.control.layers(baseLayers, overlays, { collapsed: false }).addTo(map);
 
@@ -272,6 +274,7 @@ map.on('baselayerchange', function(e) {
 </script>
 </body>
 </html>
+
 
 
 
