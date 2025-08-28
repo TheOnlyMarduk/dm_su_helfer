@@ -259,6 +259,7 @@ const overlays = {
 // Standardmäßig 10 km + Helfer anzeigen
 layer10km.addTo(map);
 layerHelfer.addTo(map);
+L.layerGroup([umleitungLayer, verbotLayer]).addTo(map);
 
 L.control.layers(baseLayers, overlays, { collapsed: false }).addTo(map);
 
@@ -271,6 +272,7 @@ map.on('baselayerchange', function(e) {
 </script>
 </body>
 </html>
+
 
 
 
