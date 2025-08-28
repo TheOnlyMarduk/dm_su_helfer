@@ -242,6 +242,10 @@ fetch('helfer.geojson')
 // Overlays laden  
 const umleitungVerbotGroup = L.layerGroup([umleitungLayer, verbotLayer]);
 
+// GeoJSON-Daten wirklich laden
+loadUmleitung();
+loadVerbot();
+  
 // gleich aktivieren
 umleitungVerbotGroup.addTo(map);
 
@@ -274,6 +278,7 @@ map.on('baselayerchange', function(e) {
 </script>
 </body>
 </html>
+
 
 
 
